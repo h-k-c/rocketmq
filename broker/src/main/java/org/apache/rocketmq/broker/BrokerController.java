@@ -180,12 +180,7 @@ public class BrokerController {
     private Future<?> slaveSyncFuture;
     private Map<Class,AccessValidator> accessValidatorMap = new HashMap<Class, AccessValidator>();
 
-    public BrokerController(
-        final BrokerConfig brokerConfig,
-        final NettyServerConfig nettyServerConfig,
-        final NettyClientConfig nettyClientConfig,
-        final MessageStoreConfig messageStoreConfig
-    ) {
+    public BrokerController(final BrokerConfig brokerConfig, final NettyServerConfig nettyServerConfig, final NettyClientConfig nettyClientConfig, final MessageStoreConfig messageStoreConfig) {
         this.brokerConfig = brokerConfig;
         this.nettyServerConfig = nettyServerConfig;
         this.nettyClientConfig = nettyClientConfig;
@@ -220,11 +215,7 @@ public class BrokerController {
         this.setStoreHost(new InetSocketAddress(this.getBrokerConfig().getBrokerIP1(), this.getNettyServerConfig().getListenPort()));
 
         this.brokerFastFailure = new BrokerFastFailure(this);
-        this.configuration = new Configuration(
-            log,
-            BrokerPathConfigHelper.getBrokerConfigPath(),
-            this.brokerConfig, this.nettyServerConfig, this.nettyClientConfig, this.messageStoreConfig
-        );
+        this.configuration = new Configuration(log, BrokerPathConfigHelper.getBrokerConfigPath(), this.brokerConfig, this.nettyServerConfig, this.nettyClientConfig, this.messageStoreConfig);
     }
 
     public BrokerConfig getBrokerConfig() {
@@ -250,7 +241,6 @@ public class BrokerController {
         result = result && this.consumerOffsetManager.load();
         result = result && this.subscriptionGroupManager.load();
         result = result && this.consumerFilterManager.load();
-
         //加载成功
         if (result) {
             try {

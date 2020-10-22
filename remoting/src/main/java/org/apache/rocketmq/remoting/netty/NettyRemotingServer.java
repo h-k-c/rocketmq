@@ -63,7 +63,11 @@ import org.apache.rocketmq.remoting.exception.RemotingTimeoutException;
 import org.apache.rocketmq.remoting.exception.RemotingTooMuchRequestException;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+/*
+* netty服务相关代码
+* */
 public class NettyRemotingServer extends NettyRemotingAbstract implements RemotingServer {
+
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
     private final ServerBootstrap serverBootstrap;
     private final EventLoopGroup eventLoopGroupSelector;
@@ -93,10 +97,10 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         this(nettyServerConfig, null);
     }
 
-    public NettyRemotingServer(final NettyServerConfig nettyServerConfig,
-        final ChannelEventListener channelEventListener) {
+    public NettyRemotingServer(final NettyServerConfig nettyServerConfig, final ChannelEventListener channelEventListener) {
 
         super(nettyServerConfig.getServerOnewaySemaphoreValue(), nettyServerConfig.getServerAsyncSemaphoreValue());
+
         //新建netty网络属性
         this.serverBootstrap = new ServerBootstrap();
         this.nettyServerConfig = nettyServerConfig;
@@ -177,9 +181,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
     }
 
     private boolean useEpoll() {
-        return RemotingUtil.isLinuxPlatform()
-            && nettyServerConfig.isUseEpollNativeSelector()
-            && Epoll.isAvailable();
+        return RemotingUtil.isLinuxPlatform() && nettyServerConfig.isUseEpollNativeSelector() && Epoll.isAvailable();
     }
 
     @Override
@@ -195,8 +197,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
         prepareSharableHandlers();
         //新建netty的网络配置
-        ServerBootstrap childHandler =
-            this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector)
+        ServerBootstrap childHandler = this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector)
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_REUSEADDR, true)
@@ -205,7 +206,6 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                 .childOption(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSndBufSize())
                 .childOption(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketRcvBufSize())
                 .localAddress(new InetSocketAddress(this.nettyServerConfig.getListenPort()))
-
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
@@ -216,13 +216,13 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
                                 //负责编码
                                 new NettyDecoder(),
                                 new IdleStateHandler(
-                                        0,
-                                        0,
-                                        nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
-                                        //负责网络进行了链接
-                                        connectionManageHandler,
-                                        //网络请求处理
-                                        serverHandler
+                                    0,
+                                    0,
+                                    nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
+                                    //负责网络进行了链接
+                                    connectionManageHandler,
+                                    //网络请求处理
+                                    serverHandler
                             );
                     }
                 });

@@ -148,6 +148,7 @@ public class NamesrvStartup {
         }
         //初始化
         boolean initResult = controller.initialize();
+
         if (!initResult) {
             controller.shutdown();
             System.exit(-3);
@@ -160,6 +161,7 @@ public class NamesrvStartup {
                 return null;
             }
         }));
+
         //进行启动
         controller.start();
 

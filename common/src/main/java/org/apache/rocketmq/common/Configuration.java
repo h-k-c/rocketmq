@@ -99,6 +99,7 @@ public class Configuration {
         }
 
         try {
+            //写锁
             readWriteLock.writeLock().lockInterruptibly();
 
             try {

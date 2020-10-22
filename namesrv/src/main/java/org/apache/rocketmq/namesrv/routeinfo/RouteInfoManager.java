@@ -100,30 +100,13 @@ public class RouteInfoManager {
     }
 
     //进行broker的注册
-    public RegisterBrokerResult registerBroker(
-        //集群名称
-        final String clusterName,
-        //broker的地址
-        final String brokerAddr,
-        //broker的名称
-        final String brokerName,
-        //broker的id
-        final long brokerId,
-        //ha服务的地址
-        final String haServerAddr,
-        //topic包装类
-        final TopicConfigSerializeWrapper topicConfigWrapper,
-        //服务过滤列表
-        final List<String> filterServerList,
-        //通道
-        final Channel channel) {
+    public RegisterBrokerResult registerBroker(final String clusterName, final String brokerAddr, final String brokerName, final long brokerId, final String haServerAddr, final TopicConfigSerializeWrapper topicConfigWrapper, final List<String> filterServerList, final Channel channel) {
         //注册返回的消息
         RegisterBrokerResult result = new RegisterBrokerResult();
         try {
             try {
                 //加入写锁
                 this.lock.writeLock().lockInterruptibly();
-
                 //添加集群中的broker
                 Set<String> brokerNames = this.clusterAddrTable.get(clusterName);
                 if (null == brokerNames) {
@@ -132,10 +115,7 @@ public class RouteInfoManager {
                     this.clusterAddrTable.put(clusterName, brokerNames);
                 }
                 brokerNames.add(brokerName);
-
-
                 boolean registerFirst = false;
-
                 //broker中的数据，broker的<broker名称,broker的内容>
                 BrokerData brokerData = this.brokerAddrTable.get(brokerName);
                 if (null == brokerData) {
@@ -147,7 +127,6 @@ public class RouteInfoManager {
                 Map<Long, String> brokerAddrsMap = brokerData.getBrokerAddrs();
                 //Switch slave to master: first remove <1, IP:PORT> in namesrv, then add <0, IP:PORT>
                 //The same IP:PORT must only have one record in brokerAddrTable
-
                 //移除旧的ip map中brokeraddr的地址
                 Iterator<Entry<Long, String>> it = brokerAddrsMap.entrySet().iterator();
                 while (it.hasNext()) {
@@ -159,7 +138,6 @@ public class RouteInfoManager {
                 //添加成功
                 String oldAddr = brokerData.getBrokerAddrs().put(brokerId, brokerAddr);
                 registerFirst = registerFirst || (null == oldAddr);
-
                 if (null != topicConfigWrapper && MixAll.MASTER_ID == brokerId) {
                     if (this.isBrokerTopicConfigChanged(brokerAddr, topicConfigWrapper.getDataVersion()) || registerFirst) {
                         ConcurrentMap<String, TopicConfig> tcTable = topicConfigWrapper.getTopicConfigTable();
@@ -175,7 +153,6 @@ public class RouteInfoManager {
                 if (null == prevBrokerLiveInfo) {
                     log.info("new broker registered, {} HAServer: {}", brokerAddr, haServerAddr);
                 }
-
                 //移除过滤中的broker信息，如果存在
                 if (filterServerList != null) {
                     if (filterServerList.isEmpty()) {
@@ -184,7 +161,6 @@ public class RouteInfoManager {
                         this.filterServerTable.put(brokerAddr, filterServerList);
                     }
                 }
-
                 //赋值result
                 if (MixAll.MASTER_ID != brokerId) {
                     String masterAddr = brokerData.getBrokerAddrs().get(MixAll.MASTER_ID);

@@ -40,15 +40,17 @@ import org.apache.rocketmq.srvutil.FileWatchService;
 
 
 public class NamesrvController {
+
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
     private final NamesrvConfig namesrvConfig;
 
     private final NettyServerConfig nettyServerConfig;
 
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
-        "NSScheduledThread"));
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl("NSScheduledThread"));
+
     private final KVConfigManager kvConfigManager;
+
     private final RouteInfoManager routeInfoManager;
 
     private RemotingServer remotingServer;
@@ -58,6 +60,7 @@ public class NamesrvController {
     private ExecutorService remotingExecutor;
 
     private Configuration configuration;
+
     private FileWatchService fileWatchService;
 
     //环境进行赋值
@@ -67,10 +70,7 @@ public class NamesrvController {
         this.kvConfigManager = new KVConfigManager(this);
         this.routeInfoManager = new RouteInfoManager();
         this.brokerHousekeepingService = new BrokerHousekeepingService(this);
-        this.configuration = new Configuration(
-            log,
-            this.namesrvConfig, this.nettyServerConfig
-        );
+        this.configuration = new Configuration(log, this.namesrvConfig, this.nettyServerConfig);
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
 
@@ -78,12 +78,11 @@ public class NamesrvController {
 
         //载入kv的配置数据
         this.kvConfigManager.load();
-        //构造netty网络服务器
+        //构造netty网络服务器----netty实现---------------------新建netty服务器
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
-        //工作线程池
-        this.remotingExecutor =
-            Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
-        //把相应的组件注册到netty服务器中
+        //工作线程池-----------------------------------------新建工作线程池
+        this.remotingExecutor = Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
+        //把相应的broker注册到netty服务器中
         this.registerProcessor();
         //定时任务进行检测,查看哪些活动的broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
@@ -137,15 +136,14 @@ public class NamesrvController {
                 log.warn("FileWatchService created error, can't load the certificate dynamically");
             }
         }
-
         return true;
     }
 
+    //对broker进行注册
     private void registerProcessor() {
         if (namesrvConfig.isClusterTest()) {
             //集群配置
-            this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
-                this.remotingExecutor);
+            this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()), this.remotingExecutor);
         } else {
             //把默认请求组件注册进netty服务中去，也就是说收到网络请求后会由这个组件来处理。
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
@@ -153,6 +151,7 @@ public class NamesrvController {
     }
 
     public void start() throws Exception {
+
         //启动netty服务
         this.remotingServer.start();
 

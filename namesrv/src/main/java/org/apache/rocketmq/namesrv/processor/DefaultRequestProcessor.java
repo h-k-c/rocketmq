@@ -59,6 +59,7 @@ import org.apache.rocketmq.remoting.netty.NettyRequestProcessor;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
 public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implements NettyRequestProcessor {
+
     private static InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
     protected final NamesrvController namesrvController;
@@ -68,17 +69,12 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
     }
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
 
         //打印调试日志的
         if (ctx != null) {
-            log.debug("receive request, {} {} {}",
-                request.getCode(),
-                RemotingHelper.parseChannelRemoteAddr(ctx.channel()),
-                request);
+            log.debug("receive request, {} {} {}", request.getCode(), RemotingHelper.parseChannelRemoteAddr(ctx.channel()), request);
         }
-
 
         //根据不同的请求类型进行处理
         switch (request.getCode()) {
@@ -285,8 +281,8 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
         return response;
     }
 
-    public RemotingCommand registerBroker(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
+    //注册broker到nameserver中
+    public RemotingCommand registerBroker(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
         final RemotingCommand response = RemotingCommand.createResponseCommand(RegisterBrokerResponseHeader.class);
 
         //解析注册的请求，然后构造返回值
@@ -300,8 +296,9 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
             return response;
         }
 
-        //
+        //topic相关的属性
         TopicConfigSerializeWrapper topicConfigWrapper;
+
         if (request.getBody() != null) {
             topicConfigWrapper = TopicConfigSerializeWrapper.decode(request.getBody(), TopicConfigSerializeWrapper.class);
         } else {
@@ -323,7 +320,6 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
             ctx.channel()
         );
 
-
         //构造返回的响应，同时进行返回
         responseHeader.setHaServerAddr(result.getHaServerAddr());
         responseHeader.setMasterAddr(result.getMasterAddr());
@@ -332,6 +328,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
         response.setBody(jsonValue);
         response.setCode(ResponseCode.SUCCESS);
         response.setRemark(null);
+
         return response;
     }
 
