@@ -27,33 +27,48 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 
 public class BrokerConfig {
+    //日志打印相关
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.COMMON_LOGGER_NAME);
 
+    //rocketmq运行路径
     private String rocketmqHome = System.getProperty(MixAll.ROCKETMQ_HOME_PROPERTY, System.getenv(MixAll.ROCKETMQ_HOME_ENV));
+
+    //所注册的nameServer地址名称
     @ImportantField
     private String namesrvAddr = System.getProperty(MixAll.NAMESRV_ADDR_PROPERTY, System.getenv(MixAll.NAMESRV_ADDR_ENV));
+
+    //得到本机的地址
     @ImportantField
     private String brokerIP1 = RemotingUtil.getLocalAddress();
     private String brokerIP2 = RemotingUtil.getLocalAddress();
+    //broker的名称，主机名称
     @ImportantField
     private String brokerName = localHostName();
+    //broker集群名称
     @ImportantField
     private String brokerClusterName = "DefaultCluster";
+    //broker的Id
     @ImportantField
     private long brokerId = MixAll.MASTER_ID;
+    //broker的权限管理
     private int brokerPermission = PermName.PERM_READ | PermName.PERM_WRITE;
+    //默认的topic的队列名称
     private int defaultTopicQueueNums = 8;
+
     @ImportantField
     private boolean autoCreateTopicEnable = true;
 
     private boolean clusterTopicEnable = true;
 
     private boolean brokerTopicEnable = true;
+
     @ImportantField
     private boolean autoCreateSubscriptionGroup = true;
     private String messageStorePlugIn = "";
+
     @ImportantField
     private String msgTraceTopicName = TopicValidator.RMQ_SYS_TRACE_TOPIC;
+
     @ImportantField
     private boolean traceTopicEnable = false;
     /**

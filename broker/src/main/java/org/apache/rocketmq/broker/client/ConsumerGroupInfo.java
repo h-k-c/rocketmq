@@ -35,10 +35,8 @@ import org.apache.rocketmq.common.protocol.heartbeat.SubscriptionData;
 public class ConsumerGroupInfo {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
     private final String groupName;
-    private final ConcurrentMap<String/* Topic */, SubscriptionData> subscriptionTable =
-        new ConcurrentHashMap<String, SubscriptionData>();
-    private final ConcurrentMap<Channel, ClientChannelInfo> channelInfoTable =
-        new ConcurrentHashMap<Channel, ClientChannelInfo>(16);
+    private final ConcurrentMap<String/* Topic */, SubscriptionData> subscriptionTable = new ConcurrentHashMap<String, SubscriptionData>();
+    private final ConcurrentMap<Channel, ClientChannelInfo> channelInfoTable = new ConcurrentHashMap<Channel, ClientChannelInfo>(16);
     private volatile ConsumeType consumeType;
     private volatile MessageModel messageModel;
     private volatile ConsumeFromWhere consumeFromWhere;

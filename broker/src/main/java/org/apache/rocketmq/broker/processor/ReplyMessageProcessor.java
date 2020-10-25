@@ -53,8 +53,7 @@ public class ReplyMessageProcessor extends AbstractSendMessageProcessor implemen
     }
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx,
-        RemotingCommand request) throws RemotingCommandException {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
         SendMessageContext mqtraceContext = null;
         SendMessageRequestHeader requestHeader = parseRequestHeader(request);
         if (requestHeader == null) {
@@ -63,9 +62,7 @@ public class ReplyMessageProcessor extends AbstractSendMessageProcessor implemen
 
         mqtraceContext = buildMsgContext(ctx, requestHeader);
         this.executeSendMessageHookBefore(ctx, request, mqtraceContext);
-
         RemotingCommand response = this.processReplyMessageRequest(ctx, request, mqtraceContext, requestHeader);
-
         this.executeSendMessageHookAfter(response, mqtraceContext);
         return response;
     }
@@ -93,10 +90,7 @@ public class ReplyMessageProcessor extends AbstractSendMessageProcessor implemen
         return requestHeader;
     }
 
-    private RemotingCommand processReplyMessageRequest(final ChannelHandlerContext ctx,
-        final RemotingCommand request,
-        final SendMessageContext sendMessageContext,
-        final SendMessageRequestHeader requestHeader) {
+    private RemotingCommand processReplyMessageRequest(final ChannelHandlerContext ctx, final RemotingCommand request, final SendMessageContext sendMessageContext, final SendMessageRequestHeader requestHeader) {
         final RemotingCommand response = RemotingCommand.createResponseCommand(SendMessageResponseHeader.class);
         final SendMessageResponseHeader responseHeader = (SendMessageResponseHeader) response.readCustomHeader();
 

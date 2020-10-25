@@ -44,6 +44,7 @@ import org.apache.rocketmq.common.help.FAQUrl;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.logging.InternalLoggerFactory;
 
+//rocketmq全局变量
 public class MixAll {
     public static final String ROCKETMQ_HOME_ENV = "ROCKETMQ_HOME";
     public static final String ROCKETMQ_HOME_PROPERTY = "rocketmq.home.dir";
@@ -228,8 +229,7 @@ public class MixAll {
         printObjectProperties(logger, object, false);
     }
 
-    public static void printObjectProperties(final InternalLogger logger, final Object object,
-        final boolean onlyImportantField) {
+    public static void printObjectProperties(final InternalLogger logger, final Object object, final boolean onlyImportantField) {
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (!Modifier.isStatic(field.getModifiers())) {
@@ -319,7 +319,6 @@ public class MixAll {
                 try {
                     String tmp = mn.substring(4);
                     String first = mn.substring(3, 4);
-
                     String key = first.toLowerCase() + tmp;
                     String property = p.getProperty(key);
                     if (property != null) {

@@ -21,34 +21,47 @@ import org.apache.rocketmq.common.annotation.ImportantField;
 import org.apache.rocketmq.store.ConsumeQueue;
 
 public class MessageStoreConfig {
+
     //The root directory in which the log data is kept
+    //存储的根目录
     @ImportantField
     private String storePathRootDir = System.getProperty("user.home") + File.separator + "store";
 
     //The directory in which the commitlog is kept
+    //CommitLog的存储的文件路径
     @ImportantField
     private String storePathCommitLog = System.getProperty("user.home") + File.separator + "store"
         + File.separator + "commitlog";
 
     // CommitLog file size,default is 1G
+    //默认commitlog的大小为1G
     private int mappedFileSizeCommitLog = 1024 * 1024 * 1024;
+
     // ConsumeQueue file size,default is 30W
+    //ConsumeQueue默认的文件大小为30M
     private int mappedFileSizeConsumeQueue = 300000 * ConsumeQueue.CQ_STORE_UNIT_SIZE;
+
     // enable consume queue ext
     private boolean enableConsumeQueueExt = false;
+
+
     // ConsumeQueue extend file size, 48M
+    //ConsumeQueue 的扩展大小文件为48M
     private int mappedFileSizeConsumeQueueExt = 48 * 1024 * 1024;
+
     // Bit count of filter bit map.
     // this will be set by pipe of calculate filter bit map.
     private int bitMapLengthConsumeQueueExt = 64;
 
     // CommitLog flush interval
     // flush data to disk
+    //commitLog刷入磁盘的间隔
     @ImportantField
     private int flushIntervalCommitLog = 500;
 
     // Only used if TransientStorePool enabled
     // flush data to FileChannel
+    //
     @ImportantField
     private int commitIntervalCommitLog = 200;
 
@@ -59,91 +72,133 @@ public class MessageStoreConfig {
     private boolean useReentrantLockWhenPutMessage = false;
 
     // Whether schedule flush,default is real-time
+    //定时刷盘
     @ImportantField
     private boolean flushCommitLogTimed = false;
+
     // ConsumeQueue flush interval
+    // 刷盘间隔
     private int flushIntervalConsumeQueue = 1000;
+
     // Resource reclaim interval
     private int cleanResourceInterval = 10000;
+
     // CommitLog removal interval
     private int deleteCommitLogFilesInterval = 100;
+
     // ConsumeQueue removal interval
     private int deleteConsumeQueueFilesInterval = 100;
     private int destroyMapedFileIntervalForcibly = 1000 * 120;
     private int redeleteHangedFileInterval = 1000 * 120;
+
     // When to delete,default is at 4 am
+    // 删除的时间
     @ImportantField
     private String deleteWhen = "04";
     private int diskMaxUsedSpaceRatio = 75;
+
     // The number of hours to keep a log file before deleting it (in hours)
+    // 删除一个文件的保留时间
     @ImportantField
     private int fileReservedTime = 72;
+
     // Flow control for ConsumeQueue
+    //存放消息最大索引值
     private int putMsgIndexHightWater = 600000;
+
     // The maximum size of message,default is 4M
+    // 消息的最大的消息大小
     private int maxMessageSize = 1024 * 1024 * 4;
+
     // Whether check the CRC32 of the records consumed.
     // This ensures no on-the-wire or on-disk corruption to the messages occurred.
     // This check adds some overhead,so it may be disabled in cases seeking extreme performance.
     private boolean checkCRCOnRecover = true;
+
     // How many pages are to be flushed when flush CommitLog
+    // 刷新commitLog时候刷新多少页
     private int flushCommitLogLeastPages = 4;
+
     // How many pages are to be committed when commit data to file
     private int commitCommitLogLeastPages = 4;
+
     // Flush page size when the disk in warming state
+    //刷入磁盘时候预热状态刷入文件的大小
     private int flushLeastPagesWhenWarmMapedFile = 1024 / 4 * 16;
+
     // How many pages are to be flushed when flush ConsumeQueue
+    // 刷新consumeQueue时候刷入多少页
     private int flushConsumeQueueLeastPages = 2;
     private int flushCommitLogThoroughInterval = 1000 * 10;
     private int commitCommitLogThoroughInterval = 200;
     private int flushConsumeQueueThoroughInterval = 1000 * 60;
+
+    //消息的在内存中的最大传输字节
     @ImportantField
     private int maxTransferBytesOnMessageInMemory = 1024 * 256;
+
+    //内存中最大传输数
     @ImportantField
     private int maxTransferCountOnMessageInMemory = 32;
+
+    //消息的在磁盘中的最大传输字节
     @ImportantField
     private int maxTransferBytesOnMessageInDisk = 1024 * 64;
+
+    //消息的在磁盘中的最大传输字节
     @ImportantField
     private int maxTransferCountOnMessageInDisk = 8;
+
+    //访问内存中消息的最大速率
     @ImportantField
     private int accessMessageInMemoryMaxRatio = 40;
+
     @ImportantField
     private boolean messageIndexEnable = true;
     private int maxHashSlotNum = 5000000;
     private int maxIndexNum = 5000000 * 4;
     private int maxMsgsNumBatch = 64;
+
     @ImportantField
     private boolean messageIndexSafe = false;
     private int haListenPort = 10912;
     private int haSendHeartbeatInterval = 1000 * 5;
     private int haHousekeepingInterval = 1000 * 20;
     private int haTransferBatchSize = 1024 * 32;
+
     @ImportantField
     private String haMasterAddress = null;
     private int haSlaveFallbehindMax = 1024 * 1024 * 256;
+
+    //broker的角色
     @ImportantField
     private BrokerRole brokerRole = BrokerRole.ASYNC_MASTER;
+
+    // 刷盘的策率
     @ImportantField
     private FlushDiskType flushDiskType = FlushDiskType.ASYNC_FLUSH;
-    private int syncFlushTimeout = 1000 * 5;
-    private String messageDelayLevel = "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h";
-    private long flushDelayOffsetInterval = 1000 * 10;
-    @ImportantField
-    private boolean cleanFileForciblyEnable = true;
-    private boolean warmMapedFileEnable = false;
-    private boolean offsetCheckInSlave = false;
-    private boolean debugLockEnable = false;
-    private boolean duplicationEnable = false;
-    private boolean diskFallRecorded = true;
-    private long osPageCacheBusyTimeOutMills = 1000;
-    private int defaultQueryMaxNum = 32;
+    private int syncFlushTimeout = 1000 * 5; //刷盘超时时间
+    private String messageDelayLevel = "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h";//消息延迟发送时间间隔
+    private long flushDelayOffsetInterval = 1000 * 10;//刷新时间间隔偏移量
 
+    //文件相关
+    @ImportantField
+    private boolean cleanFileForciblyEnable = true;//强制清楚文件
+    private boolean warmMapedFileEnable = false;//mapfile的开关
+    private boolean offsetCheckInSlave = false;//slave中的偏移量开关
+    private boolean debugLockEnable = false;//调试锁的开关
+    private boolean duplicationEnable = false;//复制启用
+    private boolean diskFallRecorded = true;//磁盘调用记录
+    private long osPageCacheBusyTimeOutMills = 1000;//os缓存中的超时时间
+    private int defaultQueryMaxNum = 32;//默认的最大查询数量
+
+    //短暂存储池
     @ImportantField
     private boolean transientStorePoolEnable = false;
     private int transientStorePoolSize = 5;
     private boolean fastFailIfNoBufferInStorePool = false;
 
-    private boolean enableDLegerCommitLog = false;
+    private boolean enableDLegerCommitLog = false;//启动dleger技术
     private String dLegerGroup;
     private String dLegerPeers;
     private String dLegerSelfId;

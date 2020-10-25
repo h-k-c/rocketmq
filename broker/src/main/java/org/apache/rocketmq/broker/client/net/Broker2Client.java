@@ -52,6 +52,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 
 public class Broker2Client {
+    //日志相关
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.BROKER_LOGGER_NAME);
     private final BrokerController brokerController;
 
@@ -59,25 +60,18 @@ public class Broker2Client {
         this.brokerController = brokerController;
     }
 
-    public void checkProducerTransactionState(
-        final String group,
-        final Channel channel,
-        final CheckTransactionStateRequestHeader requestHeader,
-        final MessageExt messageExt) throws Exception {
-        RemotingCommand request =
-            RemotingCommand.createRequestCommand(RequestCode.CHECK_TRANSACTION_STATE, requestHeader);
+    //检查生产者事务状态
+    public void checkProducerTransactionState(final String group, final Channel channel, final CheckTransactionStateRequestHeader requestHeader, final MessageExt messageExt) throws Exception {
+        RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.CHECK_TRANSACTION_STATE, requestHeader);
         request.setBody(MessageDecoder.encode(messageExt, false));
         try {
             this.brokerController.getRemotingServer().invokeOneway(channel, request, 10);
         } catch (Exception e) {
-            log.error("Check transaction failed because invoke producer exception. group={}, msgId={}, error={}",
-                    group, messageExt.getMsgId(), e.toString());
+            log.error("Check transaction failed because invoke producer exception. group={}, msgId={}, error={}", group, messageExt.getMsgId(), e.toString());
         }
     }
 
-    public RemotingCommand callClient(final Channel channel,
-                                      final RemotingCommand request
-    ) throws RemotingSendRequestException, RemotingTimeoutException, InterruptedException {
+    public RemotingCommand callClient(final Channel channel, final RemotingCommand request) throws RemotingSendRequestException, RemotingTimeoutException, InterruptedException {
         return this.brokerController.getRemotingServer().invokeSync(channel, request, 10000);
     }
 

@@ -63,8 +63,7 @@ public class BrokerOuterAPI {
     private final RemotingClient remotingClient;
     private final TopAddressing topAddressing = new TopAddressing(MixAll.getWSAddr());
     private String nameSrvAddr = null;
-    private BrokerFixedThreadPoolExecutor brokerOuterExecutor = new BrokerFixedThreadPoolExecutor(4, 10, 1, TimeUnit.MINUTES,
-        new ArrayBlockingQueue<Runnable>(32), new ThreadFactoryImpl("brokerOutApi_thread_", true));
+    private BrokerFixedThreadPoolExecutor brokerOuterExecutor = new BrokerFixedThreadPoolExecutor(4, 10, 1, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(32), new ThreadFactoryImpl("brokerOutApi_thread_", true));
 
     public BrokerOuterAPI(final NettyClientConfig nettyClientConfig) {
         this(nettyClientConfig, null);
@@ -153,22 +152,19 @@ public class BrokerOuterAPI {
             //注册全部broker到nameserver才能继续运行。
             final CountDownLatch countDownLatch = new CountDownLatch(nameServerAddressList.size());
             for (final String namesrvAddr : nameServerAddressList) {
-                brokerOuterExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            //真正执行注册的地方。
-                            RegisterBrokerResult result = registerBroker(namesrvAddr,oneway, timeoutMills,requestHeader,body);
-                            if (result != null) {
-                                registerBrokerResultList.add(result);
-                            }
-                            log.info("register broker[{}]to name server {} OK", brokerId, namesrvAddr);
-                        } catch (Exception e) {
-                            log.warn("registerBroker Exception, {}", namesrvAddr, e);
-                        } finally {
-                            //注册完了之后就执行countdown
-                            countDownLatch.countDown();
+                brokerOuterExecutor.execute(() -> {
+                    try {
+                        //真正执行注册的地方。
+                        RegisterBrokerResult result = registerBroker(namesrvAddr,oneway, timeoutMills,requestHeader,body);
+                        if (result != null) {
+                            registerBrokerResultList.add(result);
                         }
+                        log.info("register broker[{}]to name server {} OK", brokerId, namesrvAddr);
+                    } catch (Exception e) {
+                        log.warn("registerBroker Exception, {}", namesrvAddr, e);
+                    } finally {
+                        //注册完了之后就执行countdown
+                        countDownLatch.countDown();
                     }
                 });
             }
@@ -183,14 +179,7 @@ public class BrokerOuterAPI {
         return registerBrokerResultList;
     }
 
-    private RegisterBrokerResult registerBroker(
-        final String namesrvAddr,
-        final boolean oneway,
-        final int timeoutMills,
-        final RegisterBrokerRequestHeader requestHeader,
-        final byte[] body
-    ) throws RemotingCommandException, MQBrokerException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException,
-        InterruptedException {
+    private RegisterBrokerResult registerBroker(final String namesrvAddr, final boolean oneway, final int timeoutMills, final RegisterBrokerRequestHeader requestHeader, final byte[] body) throws RemotingCommandException, MQBrokerException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException, InterruptedException {
 
         //封装请求头和请求体
         RemotingCommand request = RemotingCommand.createRequestCommand(RequestCode.REGISTER_BROKER, requestHeader);
@@ -212,8 +201,7 @@ public class BrokerOuterAPI {
         //把请求返回的结果封装成result，并返回
         switch (response.getCode()) {
             case ResponseCode.SUCCESS: {
-                RegisterBrokerResponseHeader responseHeader =
-                    (RegisterBrokerResponseHeader) response.decodeCommandCustomHeader(RegisterBrokerResponseHeader.class);
+                RegisterBrokerResponseHeader responseHeader = (RegisterBrokerResponseHeader) response.decodeCommandCustomHeader(RegisterBrokerResponseHeader.class);
                 RegisterBrokerResult result = new RegisterBrokerResult();
                 result.setMasterAddr(responseHeader.getMasterAddr());
                 result.setHaServerAddr(responseHeader.getHaServerAddr());

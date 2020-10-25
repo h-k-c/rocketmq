@@ -226,14 +226,12 @@ public class TopicConfigManager extends ConfigManager {
         return topicConfig;
     }
 
-    public TopicConfig createTopicInSendMessageBackMethod(
-        final String topic,
-        final int clientDefaultTopicQueueNums,
-        final int perm,
-        final int topicSysFlag) {
+    public TopicConfig createTopicInSendMessageBackMethod(final String topic, final int clientDefaultTopicQueueNums, final int perm, final int topicSysFlag) {
+        //得到相关的topic的相关信息
         TopicConfig topicConfig = this.topicConfigTable.get(topic);
-        if (topicConfig != null)
+        if (topicConfig != null){
             return topicConfig;
+        }
 
         boolean createNew = false;
 
@@ -241,9 +239,9 @@ public class TopicConfigManager extends ConfigManager {
             if (this.lockTopicConfigTable.tryLock(LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
                 try {
                     topicConfig = this.topicConfigTable.get(topic);
-                    if (topicConfig != null)
+                    if (topicConfig != null){
                         return topicConfig;
-
+                    }
                     topicConfig = new TopicConfig(topic);
                     topicConfig.setReadQueueNums(clientDefaultTopicQueueNums);
                     topicConfig.setWriteQueueNums(clientDefaultTopicQueueNums);

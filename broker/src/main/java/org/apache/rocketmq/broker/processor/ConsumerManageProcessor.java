@@ -48,8 +48,7 @@ public class ConsumerManageProcessor extends AsyncNettyRequestProcessor implemen
     }
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request)
-        throws RemotingCommandException {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
         switch (request.getCode()) {
             case RequestCode.GET_CONSUMER_LIST_BY_GROUP:
                 return this.getConsumerListByGroup(ctx, request);
@@ -68,17 +67,11 @@ public class ConsumerManageProcessor extends AsyncNettyRequestProcessor implemen
         return false;
     }
 
-    public RemotingCommand getConsumerListByGroup(ChannelHandlerContext ctx, RemotingCommand request)
-        throws RemotingCommandException {
-        final RemotingCommand response =
-            RemotingCommand.createResponseCommand(GetConsumerListByGroupResponseHeader.class);
-        final GetConsumerListByGroupRequestHeader requestHeader =
-            (GetConsumerListByGroupRequestHeader) request
-                .decodeCommandCustomHeader(GetConsumerListByGroupRequestHeader.class);
+    public RemotingCommand getConsumerListByGroup(ChannelHandlerContext ctx, RemotingCommand request) throws RemotingCommandException {
+        final RemotingCommand response = RemotingCommand.createResponseCommand(GetConsumerListByGroupResponseHeader.class);
+        final GetConsumerListByGroupRequestHeader requestHeader = (GetConsumerListByGroupRequestHeader) request.decodeCommandCustomHeader(GetConsumerListByGroupRequestHeader.class);
 
-        ConsumerGroupInfo consumerGroupInfo =
-            this.brokerController.getConsumerManager().getConsumerGroupInfo(
-                requestHeader.getConsumerGroup());
+        ConsumerGroupInfo consumerGroupInfo = this.brokerController.getConsumerManager().getConsumerGroupInfo(requestHeader.getConsumerGroup());
         if (consumerGroupInfo != null) {
             List<String> clientIds = consumerGroupInfo.getAllClientId();
             if (!clientIds.isEmpty()) {

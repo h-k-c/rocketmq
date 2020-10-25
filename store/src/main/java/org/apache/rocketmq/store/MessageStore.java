@@ -103,8 +103,7 @@ public interface MessageStore {
      * @param messageFilter Message filter used to screen desired messages.
      * @return Matched messages.
      */
-    GetMessageResult getMessage(final String group, final String topic, final int queueId,
-        final long offset, final int maxMsgNums, final MessageFilter messageFilter);
+    GetMessageResult getMessage(final String group, final String topic, final int queueId, final long offset, final int maxMsgNums, final MessageFilter messageFilter);
 
     /**
      * Get maximum offset of the topic queue.

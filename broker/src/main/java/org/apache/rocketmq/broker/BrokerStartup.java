@@ -65,16 +65,11 @@ public class BrokerStartup {
 
     public static BrokerController start(BrokerController controller) {
         try {
-            //
             controller.start();
-
-            String tip = "The broker[" + controller.getBrokerConfig().getBrokerName() + ", "
-                + controller.getBrokerAddr() + "] boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
-
+            String tip = "The broker[" + controller.getBrokerConfig().getBrokerName() + ", " + controller.getBrokerAddr() + "] boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
             if (null != controller.getBrokerConfig().getNamesrvAddr()) {
                 tip += " and name server is " + controller.getBrokerConfig().getNamesrvAddr();
             }
-
             log.info(tip);
             System.out.printf("%s%n", tip);
             return controller;
@@ -82,7 +77,6 @@ public class BrokerStartup {
             e.printStackTrace();
             System.exit(-1);
         }
-
         return null;
     }
 
@@ -111,8 +105,7 @@ public class BrokerStartup {
             //解析命令行的参数,同时复制到配置文件中去。
             //PackageConflictDetect.detectFastjson();
             Options options = ServerUtil.buildCommandlineOptions(new Options());
-            commandLine = ServerUtil.parseCmdLine("mqbroker", args, buildCommandlineOptions(options),
-                new PosixParser());
+            commandLine = ServerUtil.parseCmdLine("mqbroker", args, buildCommandlineOptions(options), new PosixParser());
             if (null == commandLine) {
                 System.exit(-1);
             }
@@ -123,11 +116,10 @@ public class BrokerStartup {
             //netty的客户端的配置。
             final NettyClientConfig nettyClientConfig = new NettyClientConfig();
             //加密机制
-            nettyClientConfig.setUseTLS(Boolean.parseBoolean(System.getProperty(TLS_ENABLE,
-                String.valueOf(TlsSystemConfig.tlsMode == TlsMode.ENFORCING))));
+            nettyClientConfig.setUseTLS(Boolean.parseBoolean(System.getProperty(TLS_ENABLE, String.valueOf(TlsSystemConfig.tlsMode == TlsMode.ENFORCING))));
             //监听的端口号
             nettyServerConfig.setListenPort(10911);
-            //消息存储配置
+            //发送的消息存入commitlog中
             final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
 
             if (BrokerRole.SLAVE == messageStoreConfig.getBrokerRole()) {
@@ -149,18 +141,20 @@ public class BrokerStartup {
                     MixAll.properties2Object(properties, nettyServerConfig);
                     MixAll.properties2Object(properties, nettyClientConfig);
                     MixAll.properties2Object(properties, messageStoreConfig);
-
                     BrokerPathConfigHelper.setBrokerConfigPath(file);
                     in.close();
                 }
             }
+
             //命令行中的配置加载到broker的配置文件中去。
             MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), brokerConfig);
+
             //检查有没有rocketmq_home路径
             if (null == brokerConfig.getRocketmqHome()) {
                 System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation", MixAll.ROCKETMQ_HOME_ENV);
                 System.exit(-2);
             }
+
             //配置nameserver，可能存在多个地址。
             String namesrvAddr = brokerConfig.getNamesrvAddr();
             if (null != namesrvAddr) {
@@ -170,12 +164,11 @@ public class BrokerStartup {
                         RemotingUtil.string2SocketAddress(addr);
                     }
                 } catch (Exception e) {
-                    System.out.printf(
-                        "The Name Server Address[%s] illegal, please set it as follows, \"127.0.0.1:9876;192.168.0.1:9876\"%n",
-                        namesrvAddr);
+                    System.out.printf("The Name Server Address[%s] illegal, please set it as follows, \"127.0.0.1:9876;192.168.0.1:9876\"%n", namesrvAddr);
                     System.exit(-3);
                 }
             }
+
             //查看broker的角色。
             switch (messageStoreConfig.getBrokerRole()) {
                 case ASYNC_MASTER:
@@ -196,14 +189,17 @@ public class BrokerStartup {
             if (messageStoreConfig.isEnableDLegerCommitLog()) {
                 brokerConfig.setBrokerId(-1);
             }
+
             //设置HA的监听端口
             messageStoreConfig.setHaListenPort(nettyServerConfig.getListenPort() + 1);
+
             //与日志相关,进行xml文件读取,打印等。
             LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(lc);
             lc.reset();
             configurator.doConfigure(brokerConfig.getRocketmqHome() + "/conf/logback_broker.xml");
+
             //和打印相关的配置命令。
             if (commandLine.hasOption('p')) {
                 InternalLogger console = InternalLoggerFactory.getLogger(LoggerName.BROKER_CONSOLE_NAME);
@@ -230,19 +226,13 @@ public class BrokerStartup {
             MixAll.printObjectProperties(log, messageStoreConfig);
 
             //新建brokerController的对象。
-            final BrokerController controller = new BrokerController(
-                brokerConfig,
-                nettyServerConfig,
-                nettyClientConfig,
-                messageStoreConfig);
+            final BrokerController controller = new BrokerController(brokerConfig, nettyServerConfig, nettyClientConfig, messageStoreConfig);
+
             // remember all configs to prevent discard
             controller.getConfiguration().registerConfig(properties);
 
             //初始化brokerController中的环境
-
-
             boolean initResult = controller.initialize();
-
 
             if (!initResult) {
                 controller.shutdown();
