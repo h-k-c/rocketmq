@@ -57,7 +57,7 @@ public class BrokerStartup {
     public static String configFile = null;
     //日志文件
     public static InternalLogger log;
-
+    //
     public static void main(String[] args) {
         //创建启动的需要的环境，然后启动
         start(createBrokerController(args));

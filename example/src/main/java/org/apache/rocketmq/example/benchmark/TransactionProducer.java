@@ -59,6 +59,7 @@ public class TransactionProducer {
         Options options = ServerUtil.buildCommandlineOptions(new Options());
         CommandLine commandLine = ServerUtil.parseCmdLine("TransactionProducer", args, buildCommandlineOptions(options), new PosixParser());
         TxSendConfig config = new TxSendConfig();
+
         config.topic = commandLine.hasOption('t') ? commandLine.getOptionValue('t').trim() : "BenchmarkTest";
         config.threadCount = commandLine.hasOption('w') ? Integer.parseInt(commandLine.getOptionValue('w')) : 32;
         config.messageSize = commandLine.hasOption('s') ? Integer.parseInt(commandLine.getOptionValue('s')) : 2048;
@@ -93,8 +94,7 @@ public class TransactionProducer {
                     Snapshot begin = snapshotList.getFirst();
                     Snapshot end = snapshotList.getLast();
 
-                    final long sendCount = (end.sendRequestSuccessCount - begin.sendRequestSuccessCount)
-                            + (end.sendRequestFailedCount - begin.sendRequestFailedCount);
+                    final long sendCount = (end.sendRequestSuccessCount - begin.sendRequestSuccessCount) + (end.sendRequestFailedCount - begin.sendRequestFailedCount);
                     final long sendTps = (sendCount * 1000L) / (end.endTime - begin.endTime);
                     final double averageRT = (end.sendMessageTimeTotal - begin.sendMessageTimeTotal) / (double) (end.sendRequestSuccessCount - begin.sendRequestSuccessCount);
 
@@ -103,10 +103,7 @@ public class TransactionProducer {
                     final long unexpectedCheck = end.unexpectedCheckCount - begin.unexpectedCheckCount;
                     final long dupCheck = end.duplicatedCheck - begin.duplicatedCheck;
 
-                    System.out.printf(
-                        "Send TPS:%5d Max RT:%5d AVG RT:%3.1f Send Failed: %d check: %d unexpectedCheck: %d duplicatedCheck: %d %n",
-                            sendTps, statsBenchmark.getSendMessageMaxRT().get(), averageRT, failCount, checkCount,
-                            unexpectedCheck, dupCheck);
+                    System.out.printf("Send TPS:%5d Max RT:%5d AVG RT:%3.1f Send Failed: %d check: %d unexpectedCheck: %d duplicatedCheck: %d %n", sendTps, statsBenchmark.getSendMessageMaxRT().get(), averageRT, failCount, checkCount, unexpectedCheck, dupCheck);
                     statsBenchmark.getSendMessageMaxRT().set(0);
                 }
             }
@@ -133,40 +130,35 @@ public class TransactionProducer {
         producer.start();
 
         for (int i = 0; i < config.threadCount; i++) {
-            sendThreadPool.execute(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        boolean success = false;
-                        final long beginTimestamp = System.currentTimeMillis();
-                        try {
-                            SendResult sendResult =
-                                    producer.sendMessageInTransaction(buildMessage(config), null);
-                            success = sendResult != null && sendResult.getSendStatus() == SendStatus.SEND_OK;
-                        } catch (Throwable e) {
-                            success = false;
-                        } finally {
-                            final long currentRT = System.currentTimeMillis() - beginTimestamp;
-                            statsBenchmark.getSendMessageTimeTotal().addAndGet(currentRT);
-                            long prevMaxRT = statsBenchmark.getSendMessageMaxRT().get();
-                            while (currentRT > prevMaxRT) {
-                                boolean updated = statsBenchmark.getSendMessageMaxRT()
-                                        .compareAndSet(prevMaxRT, currentRT);
-                                if (updated)
-                                    break;
+            sendThreadPool.execute(() -> {
+                while (true) {
+                    boolean success = false;
+                    final long beginTimestamp = System.currentTimeMillis();
+                    try {
+                        SendResult sendResult = producer.sendMessageInTransaction(buildMessage(config), null);
+                        success = sendResult != null && sendResult.getSendStatus() == SendStatus.SEND_OK;
+                    } catch (Throwable e) {
+                        success = false;
+                    } finally {
+                        final long currentRT = System.currentTimeMillis() - beginTimestamp;
+                        statsBenchmark.getSendMessageTimeTotal().addAndGet(currentRT);
+                        long prevMaxRT = statsBenchmark.getSendMessageMaxRT().get();
+                        while (currentRT > prevMaxRT) {
+                            boolean updated = statsBenchmark.getSendMessageMaxRT().compareAndSet(prevMaxRT, currentRT);
+                            if (updated)
+                                break;
+                            prevMaxRT = statsBenchmark.getSendMessageMaxRT().get();
+                        }
+                        if (success) {
+                            statsBenchmark.getSendRequestSuccessCount().incrementAndGet();
+                        } else {
+                            statsBenchmark.getSendRequestFailedCount().incrementAndGet();
+                        }
+                        if (config.sendInterval > 0) {
+                            try {
+                                Thread.sleep(config.sendInterval);
+                            } catch (InterruptedException e) {
 
-                                prevMaxRT = statsBenchmark.getSendMessageMaxRT().get();
-                            }
-                            if (success) {
-                                statsBenchmark.getSendRequestSuccessCount().incrementAndGet();
-                            } else {
-                                statsBenchmark.getSendRequestFailedCount().incrementAndGet();
-                            }
-                            if (config.sendInterval > 0) {
-                                try {
-                                    Thread.sleep(config.sendInterval);
-                                } catch (InterruptedException e) {
-                                }
                             }
                         }
                     }
@@ -284,6 +276,7 @@ class TransactionListenerImpl implements TransactionListener {
         msgMeta.msgId = buf.getLong();
         msgMeta.sendResult = LocalTransactionState.values()[buf.get()];
         msgMeta.checkResult = new ArrayList<>();
+
         for (int i = 0; i < TransactionProducer.MAX_CHECK_RESULT_IN_MSG; i++) {
             msgMeta.checkResult.add(LocalTransactionState.values()[buf.get()]);
         }

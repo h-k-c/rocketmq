@@ -66,22 +66,23 @@ public class SendMessageTraceHookImpl implements SendMessageHook {
     @Override
     public void sendMessageAfter(SendMessageContext context) {
         //if it is message trace data,then it doesn't recorded
-        if (context == null || context.getMessage().getTopic().startsWith(((AsyncTraceDispatcher) localDispatcher).getTraceTopicName())
-            || context.getMqTraceContext() == null) {
+        if (context == null || context.getMessage().getTopic().startsWith(((AsyncTraceDispatcher) localDispatcher).getTraceTopicName()) || context.getMqTraceContext() == null) {
             return;
         }
         if (context.getSendResult() == null) {
             return;
         }
 
-        if (context.getSendResult().getRegionId() == null
-            || !context.getSendResult().isTraceOn()) {
+        if (context.getSendResult().getRegionId() == null || !context.getSendResult().isTraceOn()) {
             // if switch is false,skip it
             return;
         }
 
+        //
         TraceContext tuxeContext = (TraceContext) context.getMqTraceContext();
         TraceBean traceBean = tuxeContext.getTraceBeans().get(0);
+
+        //花费的时间
         int costTime = (int) ((System.currentTimeMillis() - tuxeContext.getTimeStamp()) / tuxeContext.getTraceBeans().size());
         tuxeContext.setCostTime(costTime);
         if (context.getSendResult().getSendStatus().equals(SendStatus.SEND_OK)) {

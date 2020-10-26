@@ -68,6 +68,7 @@ public class NamespaceUtil {
      * @param namespace, namespace to be unpacked.
      * @return topic/groupId without namespace.
      */
+    //处理没有namespace的topic
     public static String withoutNamespace(String resourceWithNamespace, String namespace) {
         if (StringUtils.isEmpty(resourceWithNamespace) || StringUtils.isEmpty(namespace)) {
             return resourceWithNamespace;

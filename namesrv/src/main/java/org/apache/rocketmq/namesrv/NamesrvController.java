@@ -78,9 +78,9 @@ public class NamesrvController {
 
         //载入kv的配置数据
         this.kvConfigManager.load();
-        //构造netty网络服务器----netty实现---------------------新建netty服务器
+        //构造netty网络服务器---------------------新建netty服务器
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
-        //工作线程池-----------------------------------------新建工作线程池
+        //工作线程池-----------------------------新建工作线程池
         this.remotingExecutor = Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
         //把相应的broker注册到netty服务器中
         this.registerProcessor();
@@ -161,6 +161,7 @@ public class NamesrvController {
     }
 
     public void shutdown() {
+
         //关闭远程服务
         this.remotingServer.shutdown();
         //关闭线程池

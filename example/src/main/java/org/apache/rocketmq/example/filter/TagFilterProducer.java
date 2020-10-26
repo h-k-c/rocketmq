@@ -31,10 +31,7 @@ public class TagFilterProducer {
         String[] tags = new String[] {"TagA", "TagB", "TagC"};
 
         for (int i = 0; i < 60; i++) {
-            Message msg = new Message("TagFilterTest",
-                tags[i % tags.length],
-                "Hello world".getBytes(RemotingHelper.DEFAULT_CHARSET));
-
+            Message msg = new Message("TagFilterTest", tags[i % tags.length], "Hello world".getBytes(RemotingHelper.DEFAULT_CHARSET));
             SendResult sendResult = producer.send(msg);
             System.out.printf("%s%n", sendResult);
         }

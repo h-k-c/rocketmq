@@ -80,15 +80,12 @@ public class Message implements Serializable {
 
     public void putUserProperty(final String name, final String value) {
         if (MessageConst.STRING_HASH_SET.contains(name)) {
-            throw new RuntimeException(String.format(
-                "The Property<%s> is used by system, input another please", name));
+            throw new RuntimeException(String.format("The Property<%s> is used by system, input another please", name));
         }
 
         if (value == null || value.trim().isEmpty()
             || name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                "The name or value of property can not be null or blank string!"
-            );
+            throw new IllegalArgumentException("The name or value of property can not be null or blank string!");
         }
 
         this.putProperty(name, value);

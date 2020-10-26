@@ -43,12 +43,15 @@ import org.apache.rocketmq.srvutil.ServerUtil;
 public class Consumer {
 
     public static void main(String[] args) throws MQClientException, IOException {
+
+
         Options options = ServerUtil.buildCommandlineOptions(new Options());
         CommandLine commandLine = ServerUtil.parseCmdLine("benchmarkConsumer", args, buildCommandlineOptions(options), new PosixParser());
         if (null == commandLine) {
             System.exit(-1);
         }
 
+        //得到topic,group前缀和后缀,
         final String topic = commandLine.hasOption('t') ? commandLine.getOptionValue('t').trim() : "BenchmarkTest";
         final String groupPrefix = commandLine.hasOption('g') ? commandLine.getOptionValue('g').trim() : "benchmark_consumer";
         final String isSuffixEnable = commandLine.hasOption('p') ? commandLine.getOptionValue('p').trim() : "true";
@@ -56,6 +59,7 @@ public class Consumer {
         final String expression = commandLine.hasOption('e') ? commandLine.getOptionValue('e').trim() : null;
         final double failRate = commandLine.hasOption('r') ? Double.parseDouble(commandLine.getOptionValue('r').trim()) : 0.0;
         String group = groupPrefix;
+        //赋值group的值
         if (Boolean.parseBoolean(isSuffixEnable)) {
             group = groupPrefix + "_" + (System.currentTimeMillis() % 100);
         }
@@ -81,11 +85,11 @@ public class Consumer {
         timer.scheduleAtFixedRate(new TimerTask() {
             private void printStats() {
                 if (snapshotList.size() >= 10) {
+
                     Long[] begin = snapshotList.getFirst();
                     Long[] end = snapshotList.getLast();
 
-                    final long consumeTps =
-                        (long) (((end[1] - begin[1]) / (double) (end[0] - begin[0])) * 1000L);
+                    final long consumeTps = (long) (((end[1] - begin[1]) / (double) (end[0] - begin[0])) * 1000L);
                     final double averageB2CRT = (end[2] - begin[2]) / (double) (end[1] - begin[1]);
                     final double averageS2CRT = (end[3] - begin[3]) / (double) (end[1] - begin[1]);
                     final long failCount = end[4] - begin[4];
@@ -95,9 +99,7 @@ public class Consumer {
                     statsBenchmarkConsumer.getBorn2ConsumerMaxRT().set(0);
                     statsBenchmarkConsumer.getStore2ConsumerMaxRT().set(0);
 
-                    System.out.printf("TPS: %d FAIL: %d AVG(B2C) RT: %7.3f AVG(S2C) RT: %7.3f MAX(B2C) RT: %d MAX(S2C) RT: %d%n",
-                            consumeTps, failCount, averageB2CRT, averageS2CRT, b2cMax, s2cMax
-                    );
+                    System.out.printf("TPS: %d FAIL: %d AVG(B2C) RT: %7.3f AVG(S2C) RT: %7.3f MAX(B2C) RT: %d MAX(S2C) RT: %d%n", consumeTps, failCount, averageB2CRT, averageS2CRT, b2cMax, s2cMax);
                 }
             }
 
@@ -112,6 +114,7 @@ public class Consumer {
         }, 10000, 10000);
 
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(group);
+        //和namesrv地址相关的配置
         if (commandLine.hasOption('n')) {
             String ns = commandLine.getOptionValue('n');
             consumer.setNamesrvAddr(ns);
@@ -124,10 +127,12 @@ public class Consumer {
             if (ExpressionType.TAG.equals(filterType)) {
                 String expr = MixAll.file2String(expression);
                 System.out.printf("Expression: %s%n", expr);
+
                 consumer.subscribe(topic, MessageSelector.byTag(expr));
             } else if (ExpressionType.SQL92.equals(filterType)) {
                 String expr = MixAll.file2String(expression);
                 System.out.printf("Expression: %s%n", expr);
+
                 consumer.subscribe(topic, MessageSelector.bySql(expr));
             } else {
                 throw new IllegalArgumentException("Not support filter type! " + filterType);
@@ -136,8 +141,8 @@ public class Consumer {
 
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             @Override
-            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs,
-                ConsumeConcurrentlyContext context) {
+            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+
                 MessageExt msg = msgs.get(0);
                 long now = System.currentTimeMillis();
 
@@ -150,7 +155,6 @@ public class Consumer {
                 statsBenchmarkConsumer.getStore2ConsumerTotalRT().addAndGet(store2ConsumerRT);
 
                 compareAndSetMax(statsBenchmarkConsumer.getBorn2ConsumerMaxRT(), born2ConsumerRT);
-
                 compareAndSetMax(statsBenchmarkConsumer.getStore2ConsumerMaxRT(), store2ConsumerRT);
 
                 if (ThreadLocalRandom.current().nextDouble() < failRate) {

@@ -363,8 +363,7 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
     }
 
     @Override
-    public RemotingCommand invokeSync(String addr, final RemotingCommand request, long timeoutMillis)
-        throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException {
+    public RemotingCommand invokeSync(String addr, final RemotingCommand request, long timeoutMillis) throws InterruptedException, RemotingConnectException, RemotingSendRequestException, RemotingTimeoutException {
         //当前时间
         long beginStartTime = System.currentTimeMillis();
         //获取与nameserver连接通道channel
@@ -372,8 +371,9 @@ public class NettyRemotingClient extends NettyRemotingAbstract implements Remoti
         //broker和nameserver连接通道成功
         if (channel != null && channel.isActive()) {
             try {
-                //链接请求前下钩子，做处理
+                //做扩展处理
                 doBeforeRpcHooks(addr, request);
+                //花费的时间
                 long costTime = System.currentTimeMillis() - beginStartTime;
                 if (timeoutMillis < costTime) {
                     throw new RemotingTimeoutException("invokeSync call timeout");
