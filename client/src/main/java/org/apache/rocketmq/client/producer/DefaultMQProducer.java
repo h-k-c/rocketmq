@@ -268,10 +268,13 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
      */
     @Override
     public void start() throws MQClientException {
+        //设置消费者组，事务相关时重要
         this.setProducerGroup(withNamespace(this.producerGroup));
+        //开始进行消息的发送
         this.defaultMQProducerImpl.start();
         if (null != traceDispatcher) {
             try {
+                //开始传输接口
                 traceDispatcher.start(this.getNamesrvAddr(), this.getAccessChannel());
             } catch (MQClientException e) {
                 log.warn("trace dispatcher start failed ", e);

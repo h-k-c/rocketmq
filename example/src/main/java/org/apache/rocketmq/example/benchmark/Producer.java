@@ -65,7 +65,7 @@ public class Producer {
         //线程池
         final ExecutorService sendThreadPool = Executors.newFixedThreadPool(threadCount);
 
-        //表示属性
+        //压力测试相关
         final StatsBenchmarkProducer statsBenchmark = new StatsBenchmarkProducer();
 
         final Timer timer = new Timer("BenchmarkTimerThread", true);
@@ -73,7 +73,7 @@ public class Producer {
         //快照列表
         final LinkedList<Long[]> snapshotList = new LinkedList<Long[]>();
 
-        //时间任务
+        //创建快照
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -111,13 +111,14 @@ public class Producer {
         final DefaultMQProducer producer = new DefaultMQProducer("benchmark_producer");
         producer.setInstanceName(Long.toString(System.currentTimeMillis()));
 
+        //设置nameserver地址
         if (commandLine.hasOption('n')) {
             String ns = commandLine.getOptionValue('n');
             producer.setNamesrvAddr(ns);
         }
 
         producer.setCompressMsgBodyOverHowmuch(Integer.MAX_VALUE);
-
+        //启动生产者
         producer.start();
 
         for (int i = 0; i < threadCount; i++) {
@@ -140,6 +141,7 @@ public class Producer {
                             if (msg.getProperties() != null) {
                                 msg.getProperties().clear();
                             }
+
                             int i1 = 0;
                             int startValue = (new Random(System.currentTimeMillis())).nextInt(100);
                             int size = 0;
@@ -158,6 +160,7 @@ public class Producer {
                         }
                         //执行发送消息
                         producer.send(msg);
+                        //测压参数相关的
                         statsBenchmark.getSendRequestSuccessCount().incrementAndGet();
                         statsBenchmark.getReceiveResponseSuccessCount().incrementAndGet();
 
