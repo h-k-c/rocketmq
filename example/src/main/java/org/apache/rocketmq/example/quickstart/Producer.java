@@ -44,6 +44,7 @@ public class Producer {
          * }
          * </pre>
          */
+        producer.setProducerGroup("h-k-c");
 
         producer.setNamesrvAddr("127.0.0.1:9876");
 
@@ -52,16 +53,13 @@ public class Producer {
          */
         producer.start();
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 3; i++) {
             try {
 
                 /*
                  * Create a message instance, specifying topic, tag and message body.
                  */
-                Message msg = new Message("TopicTest" /* Topic */,
-                    "TagA" /* Tag */,
-                    ("Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
-                );
+                Message msg = new Message("TopicTest" /* Topic */, "TagA" /* Tag */, ("Hello RocketMQ ---hkc " + i).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */);
 
                 /*
                  * Call send message to deliver message to one of brokers.

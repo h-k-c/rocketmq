@@ -120,13 +120,13 @@ public class Producer {
         producer.setCompressMsgBodyOverHowmuch(Integer.MAX_VALUE);
         //启动生产者
         producer.start();
-
         for (int i = 0; i < threadCount; i++) {
             sendThreadPool.execute(() -> {
                 while (true) {
                     try {
                         final Message msg;
                         try {
+                            //构建的消息
                             msg = buildMessage(messageSize, topic);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
@@ -141,7 +141,6 @@ public class Producer {
                             if (msg.getProperties() != null) {
                                 msg.getProperties().clear();
                             }
-
                             int i1 = 0;
                             int startValue = (new Random(System.currentTimeMillis())).nextInt(100);
                             int size = 0;
@@ -163,10 +162,8 @@ public class Producer {
                         //测压参数相关的
                         statsBenchmark.getSendRequestSuccessCount().incrementAndGet();
                         statsBenchmark.getReceiveResponseSuccessCount().incrementAndGet();
-
                         final long currentRT = System.currentTimeMillis() - beginTimestamp;
                         statsBenchmark.getSendMessageSuccessTimeTotal().addAndGet(currentRT);
-
                         long prevMaxRT = statsBenchmark.getSendMessageMaxRT().get();
                         while (currentRT > prevMaxRT) {
                             boolean updated = statsBenchmark.getSendMessageMaxRT().compareAndSet(prevMaxRT, currentRT);
@@ -174,7 +171,6 @@ public class Producer {
                                 break;
                             prevMaxRT = statsBenchmark.getSendMessageMaxRT().get();
                         }
-
                     } catch (RemotingException e) {
                         statsBenchmark.getSendRequestFailedCount().incrementAndGet();
                         log.error("[BENCHMARK_PRODUCER] Send Exception", e);
