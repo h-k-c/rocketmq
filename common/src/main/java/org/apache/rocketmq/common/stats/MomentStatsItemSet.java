@@ -27,9 +27,10 @@ import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.logging.InternalLogger;
 
 public class MomentStatsItemSet {
-    private final ConcurrentMap<String/* key */, MomentStatsItem> statsItemTable =
-        new ConcurrentHashMap<String, MomentStatsItem>(128);
+
+    private final ConcurrentMap<String/* key */, MomentStatsItem> statsItemTable = new ConcurrentHashMap<String, MomentStatsItem>(128);
     private final String statsName;
+
     private final ScheduledExecutorService scheduledExecutorService;
     private final InternalLogger log;
 
@@ -49,13 +50,13 @@ public class MomentStatsItemSet {
     }
 
     public void init() {
-
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
                     printAtMinutes();
                 } catch (Throwable ignored) {
+
                 }
             }
         }, Math.abs(UtilAll.computeNextMinutesTimeMillis() - System.currentTimeMillis()), 1000 * 60 * 5, TimeUnit.MILLISECONDS);

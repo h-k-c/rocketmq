@@ -28,6 +28,5 @@ public interface MessageQueueListener {
      * @param mqAll all queues in this message topic
      * @param mqDivided collection of queues,assigned to the current consumer
      */
-    void messageQueueChanged(final String topic, final Set<MessageQueue> mqAll,
-        final Set<MessageQueue> mqDivided);
+    void messageQueueChanged(final String topic, final Set<MessageQueue> mqAll, final Set<MessageQueue> mqDivided);
 }

@@ -25,6 +25,7 @@ import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.message.MessageType;
 
 public class SendMessageContext {
+
     private String producerGroup;
     private Message message;
     private MessageQueue mq;

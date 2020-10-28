@@ -34,6 +34,7 @@ public class ConsumerStatsManager {
     private static final String TOPIC_AND_GROUP_PULL_TPS = "PULL_TPS";
     private static final String TOPIC_AND_GROUP_PULL_RT = "PULL_RT";
 
+    //消费和拉取消息的速率,TPS,RT
     private final StatsItemSet topicAndGroupConsumeOKTPS;
     private final StatsItemSet topicAndGroupConsumeRT;
     private final StatsItemSet topicAndGroupConsumeFailedTPS;
@@ -41,14 +42,12 @@ public class ConsumerStatsManager {
     private final StatsItemSet topicAndGroupPullRT;
 
     public ConsumerStatsManager(final ScheduledExecutorService scheduledExecutorService) {
-        this.topicAndGroupConsumeOKTPS =
-            new StatsItemSet(TOPIC_AND_GROUP_CONSUME_OK_TPS, scheduledExecutorService, log);
 
-        this.topicAndGroupConsumeRT =
-            new StatsItemSet(TOPIC_AND_GROUP_CONSUME_RT, scheduledExecutorService, log);
+        this.topicAndGroupConsumeOKTPS = new StatsItemSet(TOPIC_AND_GROUP_CONSUME_OK_TPS, scheduledExecutorService, log);
 
-        this.topicAndGroupConsumeFailedTPS =
-            new StatsItemSet(TOPIC_AND_GROUP_CONSUME_FAILED_TPS, scheduledExecutorService, log);
+        this.topicAndGroupConsumeRT = new StatsItemSet(TOPIC_AND_GROUP_CONSUME_RT, scheduledExecutorService, log);
+
+        this.topicAndGroupConsumeFailedTPS = new StatsItemSet(TOPIC_AND_GROUP_CONSUME_FAILED_TPS, scheduledExecutorService, log);
 
         this.topicAndGroupPullTPS = new StatsItemSet(TOPIC_AND_GROUP_PULL_TPS, scheduledExecutorService, log);
 

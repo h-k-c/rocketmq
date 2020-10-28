@@ -20,6 +20,7 @@ import org.apache.rocketmq.common.UtilAll;
 import org.apache.rocketmq.common.message.MessageType;
 
 public class TraceBean {
+
     private static final String LOCAL_ADDRESS = UtilAll.ipToIPv4Str(UtilAll.getIP());
     private String topic = "";
     private String msgId = "";

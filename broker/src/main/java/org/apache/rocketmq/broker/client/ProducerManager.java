@@ -47,24 +47,21 @@ public class ProducerManager {
     }
 
     public void scanNotActiveChannel() {
-        for (final Map.Entry<String, ConcurrentHashMap<Channel, ClientChannelInfo>> entry : this.groupChannelTable
-                .entrySet()) {
+        for (final Map.Entry<String, ConcurrentHashMap<Channel, ClientChannelInfo>> entry : this.groupChannelTable.entrySet()) {
+            //得到channel信息
             final String group = entry.getKey();
             final ConcurrentHashMap<Channel, ClientChannelInfo> chlMap = entry.getValue();
-
             Iterator<Entry<Channel, ClientChannelInfo>> it = chlMap.entrySet().iterator();
             while (it.hasNext()) {
                 Entry<Channel, ClientChannelInfo> item = it.next();
                 // final Integer id = item.getKey();
                 final ClientChannelInfo info = item.getValue();
-
+                //判断channel是否超时
                 long diff = System.currentTimeMillis() - info.getLastUpdateTimestamp();
                 if (diff > CHANNEL_EXPIRED_TIMEOUT) {
                     it.remove();
                     clientChannelTable.remove(info.getClientId());
-                    log.warn(
-                            "SCAN: remove expired channel[{}] from ProducerManager groupChannelTable, producer group name: {}",
-                            RemotingHelper.parseChannelRemoteAddr(info.getChannel()), group);
+                    log.warn("SCAN: remove expired channel[{}] from ProducerManager groupChannelTable, producer group name: {}", RemotingHelper.parseChannelRemoteAddr(info.getChannel()), group);
                     RemotingUtil.closeChannel(info.getChannel());
                 }
             }
@@ -73,13 +70,10 @@ public class ProducerManager {
 
     public synchronized void doChannelCloseEvent(final String remoteAddr, final Channel channel) {
         if (channel != null) {
-            for (final Map.Entry<String, ConcurrentHashMap<Channel, ClientChannelInfo>> entry : this.groupChannelTable
-                    .entrySet()) {
+            for (final Map.Entry<String, ConcurrentHashMap<Channel, ClientChannelInfo>> entry : this.groupChannelTable.entrySet()) {
                 final String group = entry.getKey();
-                final ConcurrentHashMap<Channel, ClientChannelInfo> clientChannelInfoTable =
-                        entry.getValue();
-                final ClientChannelInfo clientChannelInfo =
-                        clientChannelInfoTable.remove(channel);
+                final ConcurrentHashMap<Channel, ClientChannelInfo> clientChannelInfoTable = entry.getValue();
+                final ClientChannelInfo clientChannelInfo = clientChannelInfoTable.remove(channel);
                 if (clientChannelInfo != null) {
                     clientChannelTable.remove(clientChannelInfo.getClientId());
                     log.info(

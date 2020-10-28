@@ -22,6 +22,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.message.MessageQueue;
 
 public class ConsumeMessageContext {
+
     private String consumerGroup;
     private List<MessageExt> msgList;
     private MessageQueue mq;

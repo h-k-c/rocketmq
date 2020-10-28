@@ -23,7 +23,9 @@ public class NettyClientConfig {
     private int clientWorkerThreads = 4;
     //回调线程池
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();
+    //one way方式的发送
     private int clientOnewaySemaphoreValue = NettySystemConfig.CLIENT_ONEWAY_SEMAPHORE_VALUE;
+    //异步方式发送
     private int clientAsyncSemaphoreValue = NettySystemConfig.CLIENT_ASYNC_SEMAPHORE_VALUE;
     private int connectTimeoutMillis = 3000;
     private long channelNotActiveInterval = 1000 * 60;

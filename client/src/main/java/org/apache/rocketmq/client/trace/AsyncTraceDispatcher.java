@@ -53,12 +53,15 @@ import static org.apache.rocketmq.client.trace.TraceConstants.TRACE_INSTANCE_NAM
 
 public class AsyncTraceDispatcher implements TraceDispatcher {
 
+    //日志相关
     private final static InternalLogger log = ClientLogger.getLog();
+
     private final int queueSize;
     private final int batchSize;
     private final int maxMsgSize;
     private final DefaultMQProducer traceProducer;
     private final ThreadPoolExecutor traceExecutor;
+
     // The last discard number of log
     private AtomicLong discardCount;
     private Thread worker;
@@ -66,8 +69,12 @@ public class AsyncTraceDispatcher implements TraceDispatcher {
     private ArrayBlockingQueue<Runnable> appenderQueue;
     private volatile Thread shutDownHook;
     private volatile boolean stopped = false;
+
+    //MQ中的信息
     private DefaultMQProducerImpl hostProducer;
     private DefaultMQPushConsumerImpl hostConsumer;
+
+
     private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
     private String dispatcherId = UUID.randomUUID().toString();
     private String traceTopicName;

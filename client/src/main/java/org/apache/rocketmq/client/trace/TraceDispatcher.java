@@ -22,6 +22,7 @@ import java.io.IOException;
 
 /**
  * Interface of asynchronous transfer data
+ * 异步传输数据接口
  */
 public interface TraceDispatcher {
     enum Type {
